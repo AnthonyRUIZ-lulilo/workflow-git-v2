@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Git - Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .version {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 5px 5px 5px 0;
+        }
+
+        .badge-feature {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-fix {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-chore {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        li::before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Workflow Git Demo</h1>
+        <p class="version">Version 0.16.2</p>
+
+        <div class="section">
+            <h2>À propos</h2>
+            <p>
+                Ce projet démontre l'implémentation d'un workflow Git moderne avec GitFlow,
+                Release Please, et validation automatique des commits conventionnels.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>Fonctionnalités</h2>
+            <ul>
+                <li>GitFlow complet avec branches <code>main</code> et <code>develop</code></li>
+                <li>Release Please pour gestion automatique des versions</li>
+                <li>Validation des Conventional Commits via Husky</li>
+                <li>PR Guard pour protection des branches</li>
+                <li>Changelog automatique avec emojis</li>
+                <li>Support des hotfix et release branches</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Types de Commits</h2>
+            <div>
+                <span class="badge badge-feature">feat: Nouvelle fonctionnalité</span>
+                <span class="badge badge-fix">fix: Correction de bug</span>
+                <span class="badge badge-fix">hotfix: Correction urgente</span>
+                <span class="badge badge-chore">chore: Maintenance</span>
+                <span class="badge badge-chore">docs: Documentation</span>
+                <span class="badge badge-chore">style: Formatage</span>
+                <span class="badge badge-chore">refactor: Refactorisation</span>
+                <span class="badge badge-chore">test: Tests</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Format de Commit</h2>
+            <p>
+                <code>type(scope): description</code>
+            </p>
+            <p style="margin-top: 10px;">
+                Exemple: <code>feat(auth): ajouter authentification OAuth</code>
+            </p>
+            <p style="margin-top: 10px;">
+                Exemple: <code>feat(user): on ajoute une authentification OAuth à l'user</code>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>
+                Projet de démonstration &middot;
+                <a href="https://github.com/AnthonyRUIZ-lulilo/workflow-git" target="_blank">
+                    Voir sur GitHub
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+<!-- Test trigger workflow -->

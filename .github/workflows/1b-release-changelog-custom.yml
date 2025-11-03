@@ -1,0 +1,68 @@
+name: release-changelog-custom
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerate-changelog:
+    # Ne s'exécute que sur les PRs créées par release-please
+    if: startsWith(github.event.pull_request.head.ref, 'release-please--')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read new version from manifest
+        id: version
+        run: |
+          VERSION_NO_V=$(jq -r '."."' .github/.release-please-manifest.json)
+          echo "version_no_v=$VERSION_NO_V" >> $GITHUB_OUTPUT
+          echo "New version: $VERSION_NO_V"
+
+      - name: Find previous version
+        id: previous
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+            echo "No previous tag found, using first commit"
+          fi
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "Previous version: $PREVIOUS_TAG"
+
+      - name: Regenerate CHANGELOG with custom format
+        env:
+          REPO_URL: ${{ github.event.repository.html_url }}
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.version_no_v }}"
+          PREVIOUS_TAG="${{ steps.previous.outputs.previous_tag }}"
+
+          echo "Regenerating CHANGELOG from ${PREVIOUS_TAG} to ${NEW_VERSION}"
+          .github/scripts/generate-changelog.sh "${PREVIOUS_TAG}" "${NEW_VERSION}" "${REPO_URL}"
+
+      - name: Commit and push custom CHANGELOG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet CHANGELOG.md; then
+            echo "No changes to CHANGELOG.md"
+            exit 0
+          fi
+
+          git add CHANGELOG.md
+          git commit -m "chore: regenerate CHANGELOG with custom format [skip ci]"
+          git push origin ${{ github.event.pull_request.head.ref }}
+
+          echo "CHANGELOG regenerated and pushed to PR"

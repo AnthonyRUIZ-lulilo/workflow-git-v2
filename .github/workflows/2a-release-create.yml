@@ -1,0 +1,77 @@
+name: release-create
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release-please--')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Read version from manifest
+        id: version
+        run: |
+          VERSION_NO_V=$(jq -r '."."' .github/.release-please-manifest.json)
+          VERSION="v${VERSION_NO_V}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_no_v=$VERSION_NO_V" >> $GITHUB_OUTPUT
+          echo "New version: $VERSION"
+
+      - name: Extract CHANGELOG for this version
+        id: changelog
+        run: |
+          VERSION_NO_V="${{ steps.version.outputs.version_no_v }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          CHANGELOG_CONTENT=$(awk "/^## \[${VERSION_NO_V}\]/,/^## \[/" CHANGELOG.md | sed '$d')
+
+          # Save to temp file
+          echo "$CHANGELOG_CONTENT" > /tmp/release_notes.md
+
+          echo "CHANGELOG extracted for version $VERSION_NO_V"
+
+      - name: Create Git tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag $VERSION
+          git push origin $VERSION
+
+          echo "Tag $VERSION created and pushed"
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ steps.version.outputs.version }}';
+            const releaseNotes = fs.readFileSync('/tmp/release_notes.md', 'utf8');
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: version,
+              body: releaseNotes,
+              draft: false,
+              prerelease: false
+            });
+
+            console.log(`Release ${version} created successfully`);

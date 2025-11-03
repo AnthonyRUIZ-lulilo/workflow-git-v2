@@ -1,0 +1,46 @@
+name: cleanup-branches
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  cleanup:
+    if: >
+      github.event.pull_request.merged == true &&
+      (github.event.pull_request.base.ref == 'develop' || github.event.pull_request.base.ref == 'main')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete merged branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const headRef = pr.head.ref;
+            const PROTECTED = new Set(['main', 'develop']);
+
+            if (pr.head.repo.full_name !== pr.base.repo.full_name) {
+              core.info('PR from fork, skipping deletion');
+              return;
+            }
+
+            if (PROTECTED.has(headRef)) {
+              core.info(`Protected branch ${headRef}, skipping deletion`);
+              return;
+            }
+
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `heads/${headRef}`
+              });
+              core.info(`Deleted branch ${headRef}`);
+            } catch (error) {
+              core.warning(`Failed to delete ${headRef}: ${error.message}`);
+            }

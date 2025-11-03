@@ -1,0 +1,27 @@
+name: hotfix-backmerge
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  backmerge:
+    name: Back-merge main to develop
+    if: >
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.base.ref == 'main' &&
+      startsWith(github.event.pull_request.head.ref, 'hotfix/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Merge main to develop
+        uses: everlytic/branch-merge@1.1.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_ref: main
+          target_branch: develop
+          commit_message_template: '[Automated] Merge {source_ref} -> {target_branch}'

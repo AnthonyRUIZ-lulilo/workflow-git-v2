@@ -1,0 +1,42 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+first_line=$(head -n1 "$1")
+
+# Autoriser les commits de merge, revert et automated
+if echo "$first_line" | grep -qE '^(Merge( branch)?|Revert |\[Automated\])'; then
+  echo "✅ Commit de merge/revert/automated détecté, validation ignorée"
+  exit 0
+fi
+
+# Types autorisés + scope OBLIGATOIRE + breaking change optionnel + sujet sans point final
+# Format: <type>(scope)[!]: <description>
+# TYPE ET SCOPE DOIVENT ÊTRE EN MINUSCULES
+regex='^(feat|fix|hotfix|style|refactor|test|chore|docs)\([a-z0-9/_-]+\)(!)?:\s.+[^.]$'
+
+if echo "$first_line" | grep -Eq "$regex"; then
+  # Vérif longueur du sujet (après ": ")
+  subject="${first_line#*: }"
+  if [ ${#subject} -le 72 ]; then
+    echo "✅ Format de commit valide"
+    exit 0
+  else
+    echo "❌ Sujet trop long (${#subject} caractères, max 72)"
+    exit 1
+  fi
+else
+  echo "❌ Format de commit invalide"
+  echo ""
+  echo "📖 Format requis: <type>(scope)[!]: <description>"
+  echo "   ⚠️  Le type doit être en minuscules"
+  echo "   ⚠️  Le scope doit être en minuscules"
+  echo "   ⚠️  Le scope est OBLIGATOIRE"
+  echo "   ⚠️  La description ne doit PAS finir par un point"
+  echo ""
+  echo "✅ Exemples valides:"
+  echo "   • feat(auth): ajouter le dark mode"
+  echo ""
+  echo "❌ Exemples invalides:"
+  echo "   • feat(Auth): scope avec majuscule"
+  exit 1
+fi
