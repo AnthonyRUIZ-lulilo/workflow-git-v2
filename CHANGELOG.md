@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.18.0](https://github.com/AnthonyRUIZ-lulilo/workflow-git-v2/compare/v0.17.0...v0.18.0) (2025-11-03)
+
+
+### 🚀 Features
+
+* **global:** initial commit ([a7e895f](https://github.com/AnthonyRUIZ-lulilo/workflow-git-v2/commit/a7e895f0665a94724a8a559213d12c639d213087))
+
 ## 0.17.0 (2025-10-31)
 
 ## What's Changed
